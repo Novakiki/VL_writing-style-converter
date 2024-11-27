@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Writing Style Converter</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <nav class="nav-bar">
+            <div class="brand">
+                <h1>Real-Time Writing Style Converter</h1>
+                <span>Transform your text instantly with AI-powered style conversion</span>
+            </div>
+            <div class="controls">
+                <select id="style" class="style-select">
+                    <option value="" disabled selected>Select Writing Style...</option>
+                    <option value="formal">Academic & Formal</option>
+                    <option value="professional">Business Professional</option>
+                    <option value="casual">Friendly & Casual</option>
+                    <option value="creative">Creative & Expressive</option>
+                </select>
+                
+                <select id="style-examples" class="style-select sub-select" style="display: none;">
+                    <!-- Dynamically populated based on parent selection -->
+                </select>
+
+                <select id="style-specifics" class="style-select sub-select" style="display: none;">
+                    <!-- Dynamically populated based on second dropdown selection -->
+                </select>
+            </div>
+        </nav>
+
+        <main class="workspace">
+            <div class="editor input-editor">
+                <div class="editor-header">
+                    <h2>Original Text</h2>
+                    <span class="word-count">0 words</span>
+                </div>
+                <textarea id="originalText" placeholder="Start typing or paste your text here... The AI will automatically convert it to your chosen style."></textarea>
+            </div>
+
+            <div class="editor output-editor">
+                <div class="editor-header">
+                    <div class="header-left">
+                        <h2>Converted Text</h2>
+                        <select id="output-language" class="language-select">
+                            <option value="english" selected>English</option>
+                            <option value="french">French</option>
+                            <option value="spanish">Spanish</option>
+                        </select>
+                    </div>
+                    <div id="status-badge" class="status">Ready</div>
+                </div>
+                <div id="styledText" class="output-area"></div>
+            </div>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html> 
