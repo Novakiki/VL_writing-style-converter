@@ -1,20 +1,18 @@
 # Real-Time Writing Style Converter
 
-A web-based application that converts text into different writing styles in real-time using AI. The application supports multiple languages and various writing styles, from formal academic to creative storytelling.
+A web-based application that converts text into different writing styles in real-time using AI.
 
 ## Features
 
 - Real-time text conversion
-- Multiple writing styles:
-  - Academic & Formal
-  - Business Professional
-  - Friendly & Casual
-  - Creative & Expressive
+- Voice types:
+  - Historical Voices (Cave Person to Modern Gen Z)
+  - Character Voices (Shakespearean, Yoda, etc.)
 - Language support:
   - English
   - French
   - Spanish
-- Nested style options with specific formats
+- Custom voice creation
 - Word count tracking
 - Responsive design
 
@@ -28,4 +26,18 @@ A web-based application that converts text into different writing styles in real
 ## Installation
 
 1. Clone the repository
-2. Install dependencies: 
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+3. Set your OpenAI API key:
+   ```bash
+   export OPENAI_API_KEY="your-api-key-here"
+   ```
+4. Run the application:
+   ```bash
+   python app.py
+   ```
+5. Open http://localhost:5000 in your browser
+
+

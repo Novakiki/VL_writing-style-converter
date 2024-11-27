@@ -1,7 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import os
 import openai
-from termcolor import colored
+from api.prompts import get_prompt
 
 # Constants
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -10,13 +10,9 @@ MODEL = "gpt-4o-mini"
 app = Flask(__name__)
 
 # Initialize OpenAI
-try:
-    if not (OPENAI_API_KEY := os.getenv("OPENAI_API_KEY")):
-        raise ValueError("OpenAI API key not found")
-    openai.api_key = OPENAI_API_KEY
-except Exception as e:
-    print(colored(f"Error initializing OpenAI: {str(e)}", "red"))
-    exit(1)
+if not (OPENAI_API_KEY := os.getenv("OPENAI_API_KEY")):
+    raise ValueError("OpenAI API key not found")
+openai.api_key = OPENAI_API_KEY
 
 @app.route('/')
 def index():
@@ -26,78 +22,61 @@ def index():
 def convert():
     try:
         data = request.json
-        input_text = data.get('text', '')
-        style = data.get('style', '')
-        example = data.get('example', '')
-        specific = data.get('specific', '')
-        target_language = data.get('target_language', 'english')
+        text = data.get('text', '').strip()
+        voice_type = data.get('voice_type', '').strip()
+        specific = data.get('specific', '').strip()
+        target_language = data.get('target_language', 'english').strip()
         
-        print(colored(f"Processing translation request: {style} in {target_language}", "cyan"))
+        if not all([text, voice_type, specific]):
+            raise ValueError("Missing required fields")
         
-        # Build the translation prompt
-        prompt = get_translation_prompt(style, example, specific)
+        # Get prompt from configuration
+        prompt = get_prompt(voice_type, specific)
+        if not prompt:
+            raise ValueError("Invalid voice type or specific option selected")
         
-        # Add language instruction
-        language_instruction = {
-            'english': "Translate to English",
-            'french': "Translate to French",
-            'spanish': "Translate to Spanish"
-        }.get(target_language, "Translate to English")
+        # Enhanced language instructions
+        language_instructions = {
+            'english': "Keep the text in English",
+            'french': (
+                "Translate the final result to French. "
+                "Make sure to use proper French grammar and accents. "
+                "Keep the same style and tone as the original. "
+                "Example: 'Where is the bathroom?' in caveman style should become 'Ugh! Où être grotte d'eau?'"
+            ),
+            'spanish': (
+                "Translate the final result to Spanish. "
+                "Make sure to use proper Spanish grammar and accents. "
+                "Keep the same style and tone as the original. "
+                "Example: 'Where is the bathroom?' in caveman style should become '¡Ugh! ¿Dónde estar cueva de agua?'"
+            )
+        }.get(target_language, "Keep the text in English")
         
-        # Call OpenAI API with modified system message
         response = openai.chat.completions.create(
             model=MODEL,
             messages=[
                 {"role": "system", "content": (
-                    f"You are a precise translator. {language_instruction} using {style} style. "
-                    f"Preserve exact meaning - only change language and tone."
+                    f"You are a precise voice and language translator. {language_instructions}. "
+                    "First apply the voice style, then translate if needed. "
+                    "Respond with plain text only, no quotation marks."
                 )},
-                {"role": "user", "content": prompt + "\n\nText to translate:\n" + input_text}
+                {"role": "user", "content": f"{prompt}\n\nText to transform:\n{text}"}
             ]
         )
         
-        translated_text = response.choices[0].message.content.strip()
-        print(colored("Translation completed successfully", "green"))
+        # Clean any remaining quotes from the response
+        converted_text = response.choices[0].message.content.strip().replace('"', '').replace("'", '')
         
         return jsonify({
-            'converted_text': translated_text,
+            'converted_text': converted_text,
             'status': 'success'
         })
 
     except Exception as e:
-        print(colored(f"Error during translation: {str(e)}", "red"))
         return jsonify({
             'error': str(e),
             'status': 'error'
         }), 500
-
-def get_translation_prompt(style, example=None, specific=None):
-    base_prompts = {
-        'formal': 'Translate using formal, sophisticated language appropriate for academic or official documents.',
-        'professional': 'Translate using clear, professional language suitable for business communication.',
-        'casual': 'Translate using relaxed, conversational language.',
-        'creative': 'Translate using creative language while preserving exact meaning.'
-    }
-    
-    prompt = base_prompts.get(style, 'Translate using standard language.')
-    
-    if example and example != 'custom-format...':
-        if example == 'historical-voice' and specific:
-            prompt += f"\nUse language typical of the {specific} historical period while preserving meaning."
-        elif example == 'character-voice' and specific:
-            prompt += f"\nUse language typical of a {specific} character while preserving meaning."
-        elif example == 'storytelling' and specific:
-            prompt += f"\nUse language typical of a {specific} story while preserving meaning."
-            
-    return prompt
-
-def get_character_prompt(character):
-    character_prompts = {
-        'caveman': "Transform this text into primitive cave-person speech.",
-        'pirate': "Speak like a salty sea captain with lots of 'Arr', 'ye', 'matey', and nautical references. Use pirate slang and seafaring terminology.",
-        'jester': "Write in a playful, rhyming style with lots of wordplay, puns, and silly jokes. Add occasional bells and foolery references.",
-    }
-    return character_prompts.get(character, "Write in a standard style.")
 
 if __name__ == '__main__':
     app.run(debug=True) 

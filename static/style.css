@@ -283,6 +283,7 @@ body {
     font-weight: 500;
     min-width: 240px;
     transition: all 0.2s;
+    margin-top: 0.5rem;
 }
 
 .custom-input:focus {

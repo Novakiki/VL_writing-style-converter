@@ -17,19 +17,13 @@
             </div>
             <div class="controls">
                 <select id="style" class="style-select">
-                    <option value="" disabled selected>Select Writing Style...</option>
-                    <option value="formal">Academic & Formal</option>
-                    <option value="professional">Business Professional</option>
-                    <option value="casual">Friendly & Casual</option>
-                    <option value="creative">Creative & Expressive</option>
+                    <option value="" disabled selected>Select Voice Type...</option>
+                    <option value="historical">Historical Voice</option>
+                    <option value="character">Character Voice</option>
                 </select>
                 
-                <select id="style-examples" class="style-select sub-select" style="display: none;">
-                    <!-- Dynamically populated based on parent selection -->
-                </select>
-
                 <select id="style-specifics" class="style-select sub-select" style="display: none;">
-                    <!-- Dynamically populated based on second dropdown selection -->
+                    <!-- Dynamically populated -->
                 </select>
             </div>
         </nav>
@@ -59,6 +53,6 @@
             </div>
         </main>
     </div>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html> 
